@@ -1003,6 +1003,7 @@ class ZcashTestnet(Zcash):
     TX_PER_BLOCK = 2
     RPC_PORT = 18232
 
+
 class Zcoin(Coin):
     NAME = "Zcoin"
     SHORTNAME = "XZC"
@@ -1033,6 +1034,32 @@ class ZcoinTestnet(Zcoin):
     REORG_LIMIT = 8000
     RPC_PORT = 18888
     PEER_DEFAULT_PORTS = {'t': '51001', 's': '51002'}
+
+    @classmethod
+    def electrum_header(cls, header, height):
+        version, = struct.unpack('<I', header[:4])
+        timestamp, mtpHashData = struct.unpack('<II', header[100:108])
+        #Zcoin - MTP
+        if timestamp == 1529062072:
+            return {
+                'block_height': height,
+                'version': version,
+                'prev_block_hash': hash_to_hex_str(header[4:36]),
+                'merkle_root': hash_to_hex_str(header[36:68]),
+                'payload_hash': hash_to_hex_str(header[68:100]),
+                'timestamp': timestamp,
+                'mtpHashData': mtpHashData,
+            }
+        else:
+            return {
+                'block_height': height,
+                'version': version,
+                'prev_block_hash': hash_to_hex_str(header[4:36]),
+                'merkle_root': hash_to_hex_str(header[36:68]),
+                'payload_hash': hash_to_hex_str(header[68:100]),
+                'timestamp': timestamp,
+            }
+
 
 class SnowGem(EquihashMixin, Coin):
     NAME = "SnowGem"
