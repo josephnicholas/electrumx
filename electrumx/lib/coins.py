@@ -1047,6 +1047,14 @@ class ZcoinTestnet(Zcoin):
                 'timestamp': timestamp,
             }
 
+    @classmethod
+    def block(cls, raw_block, height):
+        '''Return a Block namedtuple given a raw block and its height.'''
+        if height > 0:
+            return super().block(raw_block, height)
+        else:
+            return Block(raw_block, cls.block_header(raw_block, height), [])
+
 
 class SnowGem(EquihashMixin, Coin):
     NAME = "SnowGem"
