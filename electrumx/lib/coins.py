@@ -1012,7 +1012,6 @@ class ZcoinTestnet(Zcoin):
     SHORTNAME = "tXZC"
     NET = "testnet"
     XPUB_VERBYTES = bytes.fromhex("043587cf")
-    XPUB_VERBYTES = bytes.fromhex("043587cf")
     XPRV_VERBYTES = bytes.fromhex("04358394")
     P2PKH_VERBYTE = bytes.fromhex("41")
     P2SH_VERBYTES = [bytes.fromhex("b2")]
