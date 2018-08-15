@@ -1012,6 +1012,7 @@ class ZcoinTestnet(Zcoin):
     SHORTNAME = "tXZC"
     NET = "testnet"
     XPUB_VERBYTES = bytes.fromhex("043587cf")
+    XPUB_VERBYTES = bytes.fromhex("043587cf")
     XPRV_VERBYTES = bytes.fromhex("04358394")
     P2PKH_VERBYTE = bytes.fromhex("41")
     P2SH_VERBYTES = [bytes.fromhex("b2")]
@@ -1021,39 +1022,6 @@ class ZcoinTestnet(Zcoin):
     REORG_LIMIT = 8000
     RPC_PORT = 18888
     PEER_DEFAULT_PORTS = {'t': '51001', 's': '51002'}
-
-    @classmethod
-    def electrum_header(cls, header, height):
-        version, = struct.unpack('<I', header[:4])
-        timestamp, mtpHashData = struct.unpack('<II', header[100:108])
-        #Zcoin - MTP
-        if timestamp == 1529062072:
-            return {
-                'block_height': height,
-                'version': version,
-                'prev_block_hash': hash_to_hex_str(header[4:36]),
-                'merkle_root': hash_to_hex_str(header[36:68]),
-                'payload_hash': hash_to_hex_str(header[68:100]),
-                'timestamp': timestamp,
-                'mtpHashData': mtpHashData,
-            }
-        else:
-            return {
-                'block_height': height,
-                'version': version,
-                'prev_block_hash': hash_to_hex_str(header[4:36]),
-                'merkle_root': hash_to_hex_str(header[36:68]),
-                'payload_hash': hash_to_hex_str(header[68:100]),
-                'timestamp': timestamp,
-            }
-
-    @classmethod
-    def block(cls, raw_block, height):
-        '''Return a Block namedtuple given a raw block and its height.'''
-        if height > 0:
-            return super().block(raw_block, height)
-        else:
-            return Block(raw_block, cls.block_header(raw_block, height), [])
 
 
 class SnowGem(EquihashMixin, Coin):
