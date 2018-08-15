@@ -192,7 +192,7 @@ class MemPool(object):
             # Save the in_pairs, compute the fee and accept the TX
             tx.in_pairs = tuple(in_pairs)
             tx.fee = max(0, sum(v for hashX, v in tx.in_pairs) -
-                      sum(v for hashX, v in tx.out_pairs)))
+                        sum(v for hashX, v in tx.out_pairs)))
             txs[hash] = tx
 
             for hashX, value in itertools.chain(tx.in_pairs, tx.out_pairs):
