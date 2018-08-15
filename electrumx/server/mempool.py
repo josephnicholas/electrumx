@@ -293,7 +293,7 @@ class MemPool(object):
         prevouts = tuple(prevout for tx in tx_map.values()
                          for prevout in tx.prevouts
                          if (prevout[0] not in all_hashes and 
-                         prevout[1] != MINUS_1)
+                         prevout[1] != MINUS_1))
         utxos = await self.api.lookup_utxos(prevouts)
         utxo_map = {prevout: utxo for prevout, utxo in zip(prevouts, utxos)}
 
