@@ -1018,6 +1018,7 @@ class ZcoinTestnet(Zcoin):
     WIF_BYTE = bytes.fromhex("b9")
     GENESIS_HASH = ('7ac038c193c2158c428c59f9ae0c02a0'
                     '7115141c6e9dc244ae96132e99b4e642')
+    STATIC_BLOCK_HEADERS = False
     REORG_LIMIT = 8000
     RPC_PORT = 18888
     PEER_DEFAULT_PORTS = {'t': '51001', 's': '51002'}
