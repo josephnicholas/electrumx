@@ -347,6 +347,18 @@ class EquihashMixin(object):
         return deserializer.read_header(height, cls.BASIC_HEADER_SIZE)
 
 
+class MTPMixin(object):
+    STATIC_BLOCK_HEADERS = False
+    BASIC_HEADER_SIZE = 80  # Excluding Equihash solution
+    DESERIALIZER = lib_tx.DeserializerZcoinMerkleTreeProof
+
+    @classmethod
+    def block_header(cls, block, height):
+        '''Return the block header bytes'''
+        deserializer = cls.DESERIALIZER(block)
+        return deserializer.read_header(height, cls.BASIC_HEADER_SIZE)
+
+
 class ScryptMixin(object):
 
     DESERIALIZER = lib_tx.DeserializerTxTime
@@ -1008,7 +1020,7 @@ class Zcoin(Coin):
     REORG_LIMIT = 5000
 
 
-class ZcoinTestnet(Zcoin):
+class ZcoinTestnet(MTPMixin, Zcoin):
     SHORTNAME = "tXZC"
     NET = "testnet"
     XPUB_VERBYTES = bytes.fromhex("043587cf")
@@ -1018,7 +1030,6 @@ class ZcoinTestnet(Zcoin):
     WIF_BYTE = bytes.fromhex("b9")
     GENESIS_HASH = ('7ac038c193c2158c428c59f9ae0c02a0'
                     '7115141c6e9dc244ae96132e99b4e642')
-    STATIC_BLOCK_HEADERS = False
     REORG_LIMIT = 8000
     RPC_PORT = 18888
     PEER_DEFAULT_PORTS = {'t': '51001', 's': '51002'}
