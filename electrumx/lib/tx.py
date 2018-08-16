@@ -304,13 +304,20 @@ class DeserializerEquihash(Deserializer):
         return self._read_nbytes(header_end)
 
 
-class DeserializerZcoinMerkleTreeProof(Deserializer):
-    def read_heder(self, height, static_header_size):
+class DeserializerZcoin(Deserializer):
+    def read_header(self, height, static_header_size):
         start = self.cursor
-        self.cursor += static_header_size
-        mtp_hash_size = self._read_varint()
-        self.cursor += mtp_hash_size
-        header_end = self.cursor
+        version = self._read_le_uint32()
+        time = self._read_le_uint32()
+        if time == 1529062072:
+            start = self.cursor
+            self.cursor += static_header_size
+            mtp_hash_size = self._read_varint()
+            self.cursor += mtp_hash_size
+            header_end = self.cursor
+            self.cursor = start
+        else:
+            header_end = static_header_size
         self.cursor = start
         return self._read_nbytes(header_end)
 
