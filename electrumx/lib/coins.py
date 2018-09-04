@@ -1016,10 +1016,8 @@ class ZcoinTestnet(Zcoin):
     P2PKH_VERBYTE = bytes.fromhex("41")
     P2SH_VERBYTES = [bytes.fromhex("b2")]
     WIF_BYTE = bytes.fromhex("b9")
-    GENESIS_HASH = ('7ac038c193c2158c428c59f9ae0c02a0'
-                    '7115141c6e9dc244ae96132e99b4e642')
+    GENESIS_HASH = ('83df26d5a83042cda090d7469e481f3c353844ded0b2f7a32fbebf6f8ae1cd79')
     STATIC_BLOCK_HEADERS = False
-    BASIC_HEADER_SIZE = 100  # Excluding mtpHashData solution
     DESERIALIZER = lib_tx.DeserializerZcoin
     REORG_LIMIT = 8000
     RPC_PORT = 18888

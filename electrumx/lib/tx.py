@@ -286,6 +286,23 @@ class DeserializerAuxPow(Deserializer):
         self.cursor = start
         return self._read_nbytes(header_end)
 
+class DeserializerZcoin(Deserializer):
+    def read_header(self, height, static_header_size):
+        start = self.cursor
+        self.cursor += 68
+        time = self._read_le_uint32() # nTime
+
+        if time >= 1529062072:
+            self.cursor = start + static_header_size # Normal Block size 80 bytes
+            self.cursor += 100 # MTP(Version + Value + Reserved[2])
+            hash_size = self._read_varint()
+            self.cursor += hash_size
+            header_end = self.cursor
+        else:
+            header_end = static_header_size
+        self.cursor = start
+        return self._read_nbytes(header_end)
+
 
 class DeserializerAuxPowSegWit(DeserializerSegWit, DeserializerAuxPow):
     pass
@@ -300,24 +317,6 @@ class DeserializerEquihash(Deserializer):
         solution_size = self._read_varint()
         self.cursor += solution_size
         header_end = self.cursor
-        self.cursor = start
-        return self._read_nbytes(header_end)
-
-
-class DeserializerZcoin(Deserializer):
-    def read_header(self, height, static_header_size):
-        start = self.cursor
-        version = self._read_le_uint32()
-        time = self._read_le_uint32()
-        if time == 1529062072:
-            start = self.cursor
-            self.cursor += static_header_size
-            mtp_hash_size = self._read_varint()
-            self.cursor += mtp_hash_size
-            header_end = self.cursor
-            self.cursor = start
-        else:
-            header_end = static_header_size
         self.cursor = start
         return self._read_nbytes(header_end)
 
