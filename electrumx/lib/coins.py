@@ -1018,6 +1018,7 @@ class ZcoinTestnet(Zcoin):
     WIF_BYTE = bytes.fromhex("b9")
     GENESIS_HASH = ('83df26d5a83042cda090d7469e481f3c353844ded0b2f7a32fbebf6f8ae1cd79')
     STATIC_BLOCK_HEADERS = False
+    MTP_EXTRA_BYTES = 100
     DESERIALIZER = lib_tx.DeserializerZcoin
     REORG_LIMIT = 8000
     RPC_PORT = 18888
@@ -1028,6 +1029,18 @@ class ZcoinTestnet(Zcoin):
         '''Return the block header bytes'''
         deserializer = cls.DESERIALIZER(block)
         return deserializer.read_header(height, cls.BASIC_HEADER_SIZE)
+
+    @classmethod
+    def header_hash(cls, header):
+        '''Given a header return hash'''
+        return double_sha256(header[:cls.BASIC_HEADER_SIZE + cls.MTP_EXTRA_BYTES])
+
+    @classmethod
+    def block(cls, raw_block, height):
+        '''Return a Block namedtuple given a raw block and its height.'''
+        header = cls.block_header(raw_block, height)
+        txs = cls.DESERIALIZER(raw_block, start=len(header)).read_tx_block()
+        return Block(raw_block, header, txs)
 
 
 class SnowGem(EquihashMixin, Coin):

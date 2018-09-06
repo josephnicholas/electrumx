@@ -39,6 +39,7 @@ from electrumx.lib.util import (
 
 MINUS_1 = 4294967295
 
+
 class Tx(namedtuple("Tx", "version inputs outputs locktime")):
     '''Class representing a transaction.'''
 
@@ -102,8 +103,8 @@ class Deserializer(object):
         '''Return a deserialized transaction.'''
         return Tx(
             self._read_le_int32(),  # version
-            self._read_inputs(),    # inputs
-            self._read_outputs(),   # outputs
+            self._read_inputs(),  # inputs
+            self._read_outputs(),  # outputs
             self._read_le_uint32()  # locktime
         )
 
@@ -132,10 +133,10 @@ class Deserializer(object):
 
     def _read_input(self):
         return TxInput(
-            self._read_nbytes(32),   # prev_hash
+            self._read_nbytes(32),  # prev_hash
             self._read_le_uint32(),  # prev_idx
-            self._read_varbytes(),   # script
-            self._read_le_uint32()   # sequence
+            self._read_varbytes(),  # script
+            self._read_le_uint32()  # sequence
         )
 
     def _read_outputs(self):
@@ -200,7 +201,7 @@ class Deserializer(object):
 
 
 class TxSegWit(namedtuple("Tx", "version marker flag inputs outputs "
-                          "witness locktime")):
+                                "witness locktime")):
     '''Class representing a SegWit transaction.'''
 
 
@@ -286,22 +287,27 @@ class DeserializerAuxPow(Deserializer):
         self.cursor = start
         return self._read_nbytes(header_end)
 
+
 class DeserializerZcoin(Deserializer):
     def read_header(self, height, static_header_size):
         start = self.cursor
         self.cursor += 68
-        time = self._read_le_uint32() # nTime
+        time = self._read_le_uint32()  # nTime
 
         if time >= 1529062072:
-            self.cursor = start + static_header_size # Normal Block size 80 bytes
-            self.cursor += 100 # MTP(Version + Value + Reserved[2])
-            hash_size = self._read_varint()
-            self.cursor += hash_size
+            self.cursor = start + static_header_size  # Normal Block size 80 bytes
+            self.cursor += 242828   # nVersionMTP + mtpHashValue + mtpReserved[2] + mtpHashData
             header_end = self.cursor
         else:
             header_end = static_header_size
         self.cursor = start
         return self._read_nbytes(header_end)
+
+    def read_tx_block(self):
+        '''Returns a list of (deserialized_tx, tx_hash) pairs.'''
+        read = self.read_tx_and_hash
+        # Some coins have excess data beyond the end of the transactions
+        return [read() for _ in range(self._read_varint())]
 
 
 class DeserializerAuxPowSegWit(DeserializerSegWit, DeserializerAuxPow):
@@ -329,7 +335,6 @@ class TxJoinSplit(namedtuple("Tx", "version inputs outputs locktime")):
     '''Class representing a JoinSplit transaction.'''
 
 
-
 class DeserializerZcash(DeserializerEquihash):
     def read_tx(self):
         header = self._read_le_uint32()
@@ -341,8 +346,8 @@ class DeserializerZcash(DeserializerEquihash):
             version = header
         base_tx = TxJoinSplit(
             version,
-            self._read_inputs(),    # inputs
-            self._read_outputs(),   # outputs
+            self._read_inputs(),  # inputs
+            self._read_outputs(),  # outputs
             self._read_le_uint32()  # locktime
         )
         if base_tx.version >= 3:
@@ -360,14 +365,13 @@ class TxTime(namedtuple("Tx", "version time inputs outputs locktime")):
     '''Class representing transaction that has a time field.'''
 
 
-
 class DeserializerTxTime(Deserializer):
     def read_tx(self):
         return TxTime(
-            self._read_le_int32(),   # version
+            self._read_le_int32(),  # version
             self._read_le_uint32(),  # time
-            self._read_inputs(),     # inputs
-            self._read_outputs(),    # outputs
+            self._read_inputs(),  # inputs
+            self._read_outputs(),  # outputs
             self._read_le_uint32(),  # locktime
         )
 
@@ -456,6 +460,7 @@ class TxDcr(namedtuple("Tx", "version inputs outputs locktime expiry "
                              "witness")):
     '''Class representing a Decred  transaction.'''
 
+
 class DeserializerDecred(Deserializer):
     @staticmethod
     def blake256(data):
@@ -492,9 +497,9 @@ class DeserializerDecred(Deserializer):
 
     def _read_input(self):
         return TxInputDcr(
-            self._read_nbytes(32),   # prev_hash
+            self._read_nbytes(32),  # prev_hash
             self._read_le_uint32(),  # prev_idx
-            self._read_byte(),       # tree
+            self._read_byte(),  # tree
             self._read_le_uint32(),  # sequence
         )
 
@@ -530,7 +535,7 @@ class DeserializerDecred(Deserializer):
         if produce_hash:
             # TxSerializeNoWitness << 16 == 0x10000
             no_witness_header = pack_le_uint32(0x10000 | (version & 0xffff))
-            prefix_tx = no_witness_header + self.binary[start+4:end_prefix]
+            prefix_tx = no_witness_header + self.binary[start + 4:end_prefix]
             tx_hash = self.blake256(prefix_tx)
         else:
             tx_hash = None
