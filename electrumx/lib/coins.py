@@ -980,41 +980,9 @@ class Zcoin(Coin):
     REORG_LIMIT = 5000
 
 
-class ZcoinTestnet(MTPMixin, Zcoin):
-    SHORTNAME = "tXZC"
-    NET = "testnet"
-    XPUB_VERBYTES = bytes.fromhex("043587cf")
-    XPRV_VERBYTES = bytes.fromhex("04358394")
-    P2PKH_VERBYTE = bytes.fromhex("41")
-    P2SH_VERBYTES = [bytes.fromhex("b2")]
-    WIF_BYTE = bytes.fromhex("b9")
-    GENESIS_HASH = ('7ac038c193c2158c428c59f9ae0c02a0'
-                    '7115141c6e9dc244ae96132e99b4e642')
-    REORG_LIMIT = 8000
-    RPC_PORT = 18888
-    PEER_DEFAULT_PORTS = {'t': '51001', 's': '51002'}
-
-class Zcoin(Coin):
-    NAME = "Zcoin"
-    SHORTNAME = "XZC"
-    NET = "mainnet"
-    P2PKH_VERBYTE = bytes.fromhex("52")
-    P2SH_VERBYTES = [bytes.fromhex("07")]
-    WIF_BYTE = bytes.fromhex("d2")
-    GENESIS_HASH = ('4381deb85b1b2c9843c222944b616d99'
-                    '7516dcbd6a964e1eaf0def0830695233')
-    TX_COUNT = 1
-    TX_COUNT_HEIGHT = 1
-    TX_PER_BLOCK = 1
-    IRC_PREFIX = None
-    RPC_PORT = 8888
-    REORG_LIMIT = 5000
-
-
 class ZcoinTestnet(Zcoin):
     SHORTNAME = "tXZC"
     NET = "testnet"
-    XPUB_VERBYTES = bytes.fromhex("043587cf")
     XPUB_VERBYTES = bytes.fromhex("043587cf")
     XPRV_VERBYTES = bytes.fromhex("04358394")
     P2PKH_VERBYTE = bytes.fromhex("41")
@@ -1029,12 +997,10 @@ class ZcoinTestnet(Zcoin):
     PEER_DEFAULT_PORTS = {'t': '51001', 's': '51002'}
 
     @classmethod
-    def block(cls, raw_block, height):
-        '''Return a Block namedtuple given a raw block and its height.'''
-        if height > 0:
-            return super().block(raw_block, height)
-        else:
-            return Block(raw_block, cls.block_header(raw_block, height), [])
+    def block_header(cls, block, height):
+        '''Return the block header bytes'''
+        deserializer = cls.DESERIALIZER(block)
+        return deserializer.read_header(height, cls.BASIC_HEADER_SIZE)
 
     @classmethod
     def header_hash(cls, header):
