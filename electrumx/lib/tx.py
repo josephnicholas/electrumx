@@ -31,12 +31,12 @@ from collections import namedtuple
 
 from electrumx.lib.hash import sha256, double_sha256, hash_to_hex_str
 from electrumx.lib.util import (
-    cachedproperty, unpack_le_int32_from, unpack_le_int64_from,
-    unpack_le_uint16_from, unpack_le_uint32_from, unpack_le_uint64_from,
-    pack_le_int32, pack_varint, pack_le_uint32, pack_le_int64,
-    pack_varbytes,
+    unpack_le_int32_from, unpack_le_int64_from, unpack_le_uint16_from,
+    unpack_le_uint32_from, unpack_le_uint64_from, pack_le_int32, pack_varint,
+    pack_le_uint32, pack_le_int64, pack_varbytes,
 )
 
+ZERO = bytes(32)
 MINUS_1 = 4294967295
 
 
@@ -56,12 +56,15 @@ class Tx(namedtuple("Tx", "version inputs outputs locktime")):
 
 class TxInput(namedtuple("TxInput", "prev_hash prev_idx script sequence")):
     '''Class representing a transaction input.'''
-
     def __str__(self):
         script = self.script.hex()
         prev_hash = hash_to_hex_str(self.prev_hash)
         return ("Input({}, {:d}, script={}, sequence={:d})"
                 .format(prev_hash, self.prev_idx, script, self.sequence))
+
+    def is_generation(self):
+        '''Test if an input is generation/coinbase like'''
+        return self.prev_idx == MINUS_1 and self.prev_hash == ZERO
 
     def serialize(self):
         return b''.join((
