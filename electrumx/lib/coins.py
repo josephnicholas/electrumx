@@ -950,52 +950,6 @@ class ZcashTestnet(Zcash):
     TX_PER_BLOCK = 2
     RPC_PORT = 18232
 
-
-class Zcoin(Coin):
-    NAME = "Zcoin"
-    SHORTNAME = "XZC"
-    NET = "mainnet"
-    P2PKH_VERBYTE = bytes.fromhex("52")
-    P2SH_VERBYTES = [bytes.fromhex("07")]
-    WIF_BYTE = bytes.fromhex("d2")
-    GENESIS_HASH = ('4381deb85b1b2c9843c222944b616d99'
-                    '7516dcbd6a964e1eaf0def0830695233')
-    TX_COUNT = 1
-    TX_COUNT_HEIGHT = 1
-    TX_PER_BLOCK = 1
-    IRC_PREFIX = None
-    RPC_PORT = 8888
-    REORG_LIMIT = 5000
-
-
-class ZcoinTestnet(Zcoin):
-    SHORTNAME = "tXZC"
-    NET = "testnet"
-    XPUB_VERBYTES = bytes.fromhex("043587cf")
-    XPRV_VERBYTES = bytes.fromhex("04358394")
-    P2PKH_VERBYTE = bytes.fromhex("41")
-    P2SH_VERBYTES = [bytes.fromhex("b2")]
-    WIF_BYTE = bytes.fromhex("b9")
-    GENESIS_HASH = ('83df26d5a83042cda090d7469e481f3c353844ded0b2f7a32fbebf6f8ae1cd79')
-    STATIC_BLOCK_HEADERS = False
-    MTP_EXTRA_BYTES = 100
-    DESERIALIZER = lib_tx.DeserializerZcoin
-    REORG_LIMIT = 8000
-    RPC_PORT = 18888
-    PEER_DEFAULT_PORTS = {'t': '51001', 's': '51002'}
-
-    @classmethod
-    def block_header(cls, block, height):
-        '''Return the block header bytes'''
-        deserializer = cls.DESERIALIZER(block)
-        return deserializer.read_header(height, cls.BASIC_HEADER_SIZE)
-
-    @classmethod
-    def header_hash(cls, header):
-        '''Given a header return hash'''
-        return double_sha256(header[:cls.BASIC_HEADER_SIZE + cls.MTP_EXTRA_BYTES])
-
-
 class SnowGem(EquihashMixin, Coin):
     NAME = "SnowGem"
     SHORTNAME = "SNG"
@@ -2201,12 +2155,32 @@ class Zcoin(Coin):
         # 'host.example.com s t'
     ]
 
-class tZcoin(Zcoin):
-    NAME = "tZcoin"
+class ZcoinTestnet(Zcoin):
+    SHORTNAME = "tXZC"
     NET = "testnet"
+    XPUB_VERBYTES = bytes.fromhex("043587cf")
+    XPRV_VERBYTES = bytes.fromhex("04358394")
     P2PKH_VERBYTE = bytes.fromhex("41")
     P2SH_VERBYTES = [bytes.fromhex("b2")]
     WIF_BYTE = bytes.fromhex("b9")
-    GENESIS_HASH = (
-	'7ac038c193c2158c428c59f9ae0c02a07115141c6e9dc244ae96132e99b4e642')
+    GENESIS_HASH = ('83df26d5a83042cda090d7469e481f3c353844ded0b2f7a32fbebf6f8ae1cd79')
+    STATIC_BLOCK_HEADERS = False
+    MTP_EXTRA_BYTES = 100
+    DESERIALIZER = lib_tx.DeserializerZcoin
+    REORG_LIMIT = 8000
     RPC_PORT = 18888
+    PEER_DEFAULT_PORTS = {'t': '51001', 's': '51002'}
+
+    @classmethod
+    def block_header(cls, block, height):
+        '''Return the block header bytes'''
+        deserializer = cls.DESERIALIZER(block)
+        return deserializer.read_header(height, cls.BASIC_HEADER_SIZE)
+
+    @classmethod
+    def header_hash(cls, header):
+        '''Given a header return hash'''
+        return double_sha256(header[:cls.BASIC_HEADER_SIZE + cls.MTP_EXTRA_BYTES])
+
+
+    
