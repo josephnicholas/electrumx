@@ -32,14 +32,18 @@ from collections import namedtuple
 from electrumx.lib.hash import sha256, double_sha256, hash_to_hex_str
 from electrumx.lib.script import OpCodes
 from electrumx.lib.util import (
-    unpack_le_int32_from, unpack_le_int64_from, unpack_le_uint16_from,
-    unpack_le_uint32_from, unpack_le_uint64_from, pack_le_int32, pack_varint,
-    pack_le_uint32, pack_le_int64, pack_varbytes,
+    cachedproperty, unpack_le_int32_from, unpack_le_int64_from,
+    unpack_le_uint16_from, unpack_le_uint32_from, unpack_le_uint64_from,
+    pack_le_int32, pack_varint, pack_le_uint32, pack_le_int64,
+    pack_varbytes,
 )
 
-ZERO = bytes(32)
 MINUS_1 = 4294967295
 
+
+def is_gen_outpoint(hash, index):
+    '''Test if an outpoint is a generation/coinbase like'''
+    return index == MINUS_1 and hash == ZERO
 
 class Tx(namedtuple("Tx", "version inputs outputs locktime")):
     '''Class representing a transaction.'''
@@ -107,8 +111,8 @@ class Deserializer(object):
         '''Return a deserialized transaction.'''
         return Tx(
             self._read_le_int32(),  # version
-            self._read_inputs(),    # inputs
-            self._read_outputs(),   # outputs
+            self._read_inputs(),  # inputs
+            self._read_outputs(),  # outputs
             self._read_le_uint32()  # locktime
         )
 
@@ -137,10 +141,10 @@ class Deserializer(object):
 
     def _read_input(self):
         return TxInput(
-            self._read_nbytes(32),   # prev_hash
+            self._read_nbytes(32),  # prev_hash
             self._read_le_uint32(),  # prev_idx
-            self._read_varbytes(),   # script
-            self._read_le_uint32()   # sequence
+            self._read_varbytes(),  # script
+            self._read_le_uint32()  # sequence
         )
 
     def _read_outputs(self):
@@ -205,7 +209,7 @@ class Deserializer(object):
 
 
 class TxSegWit(namedtuple("Tx", "version marker flag inputs outputs "
-                          "witness locktime")):
+                                "witness locktime")):
     '''Class representing a SegWit transaction.'''
 
 
@@ -311,7 +315,6 @@ class DeserializerZcoin(Deserializer):
         self.cursor = start
         return self._read_nbytes(header_end)
 
-
 class DeserializerAuxPowSegWit(DeserializerSegWit, DeserializerAuxPow):
     pass
 
@@ -348,8 +351,8 @@ class DeserializerZcash(DeserializerEquihash):
             version = header
         base_tx = TxJoinSplit(
             version,
-            self._read_inputs(),    # inputs
-            self._read_outputs(),   # outputs
+            self._read_inputs(),  # inputs
+            self._read_outputs(),  # outputs
             self._read_le_uint32()  # locktime
         )
         if base_tx.version >= 3:
@@ -370,10 +373,10 @@ class TxTime(namedtuple("Tx", "version time inputs outputs locktime")):
 class DeserializerTxTime(Deserializer):
     def read_tx(self):
         return TxTime(
-            self._read_le_int32(),   # version
+            self._read_le_int32(),  # version
             self._read_le_uint32(),  # time
-            self._read_inputs(),     # inputs
-            self._read_outputs(),    # outputs
+            self._read_inputs(),  # inputs
+            self._read_outputs(),  # outputs
             self._read_le_uint32(),  # locktime
         )
 
@@ -571,9 +574,9 @@ class DeserializerDecred(Deserializer):
 
     def _read_input(self):
         return TxInputDcr(
-            self._read_nbytes(32),   # prev_hash
+            self._read_nbytes(32),  # prev_hash
             self._read_le_uint32(),  # prev_idx
-            self._read_byte(),       # tree
+            self._read_byte(),  # tree
             self._read_le_uint32(),  # sequence
         )
 
@@ -609,7 +612,7 @@ class DeserializerDecred(Deserializer):
         if produce_hash:
             # TxSerializeNoWitness << 16 == 0x10000
             no_witness_header = pack_le_uint32(0x10000 | (version & 0xffff))
-            prefix_tx = no_witness_header + self.binary[start+4:end_prefix]
+            prefix_tx = no_witness_header + self.binary[start + 4:end_prefix]
             tx_hash = self.blake256(prefix_tx)
         else:
             tx_hash = None
