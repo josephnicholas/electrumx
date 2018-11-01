@@ -297,7 +297,7 @@ class DeserializerAuxPow(Deserializer):
 
 
 class DeserializerZcoin(Deserializer):
-    TIME_MTP_ACTIVATE = 1529062072  # nTime for MTP to activate
+    TIME_MTP_ACTIVATE = 1539172800  # nTime for MTP to activate
 
     def read_header(self, height, static_header_size):
         start = self.cursor
