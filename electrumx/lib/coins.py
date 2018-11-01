@@ -47,7 +47,6 @@ import electrumx.server.block_processor as block_proc
 import electrumx.server.daemon as daemon
 from electrumx.server.session import ElectrumX, DashElectrumX
 
-
 Block = namedtuple("Block", "raw header transactions")
 OP_RETURN = OpCodes.OP_RETURN
 
@@ -308,7 +307,6 @@ class EquihashMixin(object):
 
 
 class ScryptMixin(object):
-
     DESERIALIZER = lib_tx.DeserializerTxTime
     HEADER_HASH = None
 
@@ -1691,7 +1689,7 @@ class Decred(Coin):
     XPRV_VERBYTES = bytes.fromhex("02fda4e8")
     P2PKH_VERBYTE = bytes.fromhex("073f")
     P2SH_VERBYTES = [bytes.fromhex("071a")]
-    WIF_BYTE = bytes.fromhex("230e")
+    WIF_BYTE = bytes.fromhex("22de")
     GENESIS_HASH = ('298e5cc3d985bfe7f81dc135f360abe0'
                     '89edd4396b86d2de66b0cef42b21d980')
     BASIC_HEADER_SIZE = 180
@@ -1745,9 +1743,9 @@ class DecredTestnet(Decred):
     XPRV_VERBYTES = bytes.fromhex("04358397")
     P2PKH_VERBYTE = bytes.fromhex("0f21")
     P2SH_VERBYTES = [bytes.fromhex("0efc")]
-    WIF_BYTE = bytes.fromhex("22de")
+    WIF_BYTE = bytes.fromhex("230e")
     GENESIS_HASH = (
-        '4261602a9d07d80ad47621a64ba6a07754902e496777edc4ff581946bd7bc29c')
+        'a649dce53918caf422e9c711c858837e08d626ecfcd198969b24f7b634a49bac')
     BASIC_HEADER_SIZE = 180
     ALLOW_ADVANCING_ERRORS = True
     TX_COUNT = 217380620
@@ -2143,7 +2141,6 @@ class PivxTestnet(Pivx):
 
 
 class Bitg(Coin):
-
     NAME = "BitcoinGreen"
     SHORTNAME = "BITG"
     NET = "mainnet"
@@ -2181,3 +2178,50 @@ class tBitg(Bitg):
     GENESIS_HASH = (
         '000008467c3a9c587533dea06ad9380cded3ed32f9742a6c0c1aebc21bf2bc9b')
     RPC_PORT = 19332
+
+
+class Zcoin(Coin):
+    NAME = "Zcoin"
+    SHORTNAME = "XZC"
+    NET = "mainnet"
+    P2PKH_VERBYTE = bytes.fromhex("52")
+    P2SH_VERBYTES = [bytes.fromhex("07")]
+    WIF_BYTE = bytes.fromhex("d2")
+    GENESIS_HASH = ('4381deb85b1b2c9843c222944b616d99'
+                    '7516dcbd6a964e1eaf0def0830695233')
+    TX_COUNT = 1
+    TX_COUNT_HEIGHT = 1
+    TX_PER_BLOCK = 1
+    RPC_PORT = 8888
+    REORG_LIMIT = 5000
+    PEER_DEFAULT_PORTS = {'t': '50001', 's': '50002'}
+
+
+class ZcoinTestnet(Zcoin):
+    SHORTNAME = "tXZC"
+    NET = "testnet"
+    XPUB_VERBYTES = bytes.fromhex("043587cf")
+    XPRV_VERBYTES = bytes.fromhex("04358394")
+    P2PKH_VERBYTE = bytes.fromhex("41")
+    P2SH_VERBYTES = [bytes.fromhex("b2")]
+    WIF_BYTE = bytes.fromhex("b9")
+    GENESIS_HASH = ('83df26d5a83042cda090d7469e481f3c'
+                    '353844ded0b2f7a32fbebf6f8ae1cd79')
+    STATIC_BLOCK_HEADERS = False
+    MTP_EXTRA_BYTES = 100
+    DESERIALIZER = lib_tx.DeserializerZcoin
+    REORG_LIMIT = 8000
+    RPC_PORT = 18888
+    PEER_DEFAULT_PORTS = {'t': '51001', 's': '51002'}
+
+    @classmethod
+    def block_header(cls, block, height):
+        '''Return the block header bytes'''
+        deserializer = cls.DESERIALIZER(block)
+        return deserializer.read_header(height, cls.BASIC_HEADER_SIZE)
+
+    @classmethod
+    def header_hash(cls, header):
+        '''Given a header return hash'''
+        return double_sha256(header[:cls.BASIC_HEADER_SIZE
+                                     + cls.MTP_EXTRA_BYTES])
